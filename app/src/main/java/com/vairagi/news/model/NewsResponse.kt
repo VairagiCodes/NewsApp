@@ -1,4 +1,4 @@
-package com.vairagi.news
+package com.vairagi.news.model
 
 data class NewsResponse(
     val articles: List<Article>,

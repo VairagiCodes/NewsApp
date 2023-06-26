@@ -1,13 +1,18 @@
 package com.vairagi.news.db
 
 import androidx.room.TypeConverter
-import com.vairagi.news.Source
+import com.vairagi.news.model.Source
 
 class Converters {
 
     @TypeConverter
-    fun fromSource(source: com.vairagi.news.Source): String {
-        return source.name
+    fun fromSource(source: Source): String {
+        return if(source.name!=null) {
+            source.name!!
+        } else {
+            "abc"
+        }
+
     }
 
     @TypeConverter

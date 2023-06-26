@@ -1,6 +1,5 @@
 package com.vairagi.news.adapter
 
-import android.text.Layout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,9 +8,8 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.vairagi.news.Article
+import com.vairagi.news.model.Article
 import com.vairagi.news.R
-import org.w3c.dom.Text
 
 class NewsAdapter: RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
     inner class ArticleViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)

@@ -1,6 +1,6 @@
 package com.vairagi.news.api
 
-import com.vairagi.news.NewsResponse
+import com.vairagi.news.model.NewsResponse
 import com.vairagi.news.util.Constant.Companion.API_KEY
 import retrofit2.Response
 import retrofit2.http.GET

@@ -5,14 +5,17 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SearchView
+import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.vairagi.news.R
 import com.vairagi.news.adapter.NewsAdapter
 import com.vairagi.news.databinding.FragmentBreakingNewsBinding
+import com.vairagi.news.db.ArticleDatabase
+import com.vairagi.news.model.Article
 import com.vairagi.news.repository.NewsRepository
 import com.vairagi.news.ui.NewsViewModel
 import com.vairagi.news.ui.NewsViewModelProviderFactory
@@ -33,10 +36,47 @@ class BreakingNews : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val repository = NewsRepository()
+        val repository = NewsRepository(ArticleDatabase(requireContext()))
         val viewModelProviderFactory = NewsViewModelProviderFactory(repository)
 
         setUpRecyclerView()
+
+        newsAdapter.setOnItemClickListener {
+            article ->
+
+
+            Log.d("article", article.toString())
+
+
+
+            if(article.author.isNullOrEmpty()) {
+                article.author = "abc"
+            }
+
+            if(article.source.id.isNullOrEmpty()) {
+                article.source.id = "1"
+            }
+
+            if(article.source.name.isNullOrEmpty()) {
+                article.source.name = "abc"
+            }
+
+
+
+
+            val bundle = Bundle().apply {
+                putSerializable("article",article)
+            }
+
+            val action = BreakingNewsDirections.actionBreakingNewsToArticleFragment(article)
+
+            findNavController().navigate(
+                R.id.action_breakingNews_to_articleFragment,
+                bundle
+            )
+
+
+        }
 
         newsViewModel = ViewModelProvider(requireActivity(), viewModelProviderFactory)[NewsViewModel::class.java]
 
@@ -62,10 +102,13 @@ class BreakingNews : Fragment() {
                 is Resource.Loading -> {
                     showProgressBar()
                 }
+
+                else -> {
+
+                }
             }
         }
 
-        setUpSearch()
 
     }
 
@@ -88,24 +131,7 @@ class BreakingNews : Fragment() {
     }
 
 
-    private fun setUpSearch() {
-        binding.etSearch.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                if(query!=null) {
 
-                    newsViewModel.searchForNews(query)
-
-                }
-
-                return true
-            }
-
-            override fun onQueryTextChange(p0: String?): Boolean {
-                return true
-            }
-
-        })
-    }
 
 
     private fun hideProgressBar() {
