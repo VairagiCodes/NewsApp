@@ -28,7 +28,7 @@ class ArticleFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val repository = NewsRepository(ArticleDatabase(requireContext()))
-        val viewModelProviderFactory = NewsViewModelProviderFactory(repository)
+        val viewModelProviderFactory = NewsViewModelProviderFactory(repository, requireContext())
         setUpWebView()
 
         newsViewModel = ViewModelProvider(requireActivity(), viewModelProviderFactory)[NewsViewModel::class.java]

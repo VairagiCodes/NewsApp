@@ -1,5 +1,6 @@
 package com.vairagi.news.ui.fragment
 
+import android.app.usage.NetworkStats
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -10,6 +11,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.vairagi.news.R
 import com.vairagi.news.adapter.NewsAdapter
 import com.vairagi.news.databinding.FragmentSearchBinding
@@ -17,7 +19,9 @@ import com.vairagi.news.db.ArticleDatabase
 import com.vairagi.news.repository.NewsRepository
 import com.vairagi.news.ui.NewsViewModel
 import com.vairagi.news.ui.NewsViewModelProviderFactory
+import com.vairagi.news.util.ConnectivityObserver
 import com.vairagi.news.util.Constant.Companion.SEARCH_NEWS_TIME_DELAY
+import com.vairagi.news.util.NetworkConnectivityObserver
 import com.vairagi.news.util.Resource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -36,7 +40,7 @@ class SearchFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val repository = NewsRepository(ArticleDatabase(requireContext()))
-        val viewModelProviderFactory = NewsViewModelProviderFactory(repository)
+        val viewModelProviderFactory = NewsViewModelProviderFactory(repository, requireContext())
 
         setUpRecyclerView()
 
@@ -121,7 +125,9 @@ class SearchFragment : Fragment() {
         searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(searchQuery: String?): Boolean {
                 if(searchQuery!=null) {
-                    newsViewModel.searchForNews(searchQuery)
+
+                    checkForInterNetConnectionAndCallForSearch(searchQuery)
+
                 }
 
                 return true
@@ -133,7 +139,7 @@ class SearchFragment : Fragment() {
                     delay(SEARCH_NEWS_TIME_DELAY)
                     if (searchQuery != null) {
                         if(searchQuery.isNotEmpty()) {
-                            newsViewModel.searchForNews(searchQuery)
+                            checkForInterNetConnectionAndCallForSearch(searchQuery)
                         }
 
                     }
@@ -144,6 +150,19 @@ class SearchFragment : Fragment() {
 
         })
 
+    }
+
+    private fun checkForInterNetConnectionAndCallForSearch(searchQuery: String) {
+        NetworkConnectivityObserver(requireContext()).observe(viewLifecycleOwner) {
+            when(it) {
+                ConnectivityObserver.Available -> {
+                    newsViewModel.searchForNews(searchQuery)
+                }
+                ConnectivityObserver.Unavailable -> {
+                    Snackbar.make(requireView(), "No Internet Connection", Snackbar.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
 

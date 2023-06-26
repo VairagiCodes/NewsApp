@@ -11,6 +11,7 @@ import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.vairagi.news.R
 import com.vairagi.news.adapter.NewsAdapter
 import com.vairagi.news.databinding.FragmentBreakingNewsBinding
@@ -19,6 +20,8 @@ import com.vairagi.news.model.Article
 import com.vairagi.news.repository.NewsRepository
 import com.vairagi.news.ui.NewsViewModel
 import com.vairagi.news.ui.NewsViewModelProviderFactory
+import com.vairagi.news.util.ConnectivityObserver
+import com.vairagi.news.util.NetworkConnectivityObserver
 import com.vairagi.news.util.Resource
 
 
@@ -37,7 +40,7 @@ class BreakingNews : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val repository = NewsRepository(ArticleDatabase(requireContext()))
-        val viewModelProviderFactory = NewsViewModelProviderFactory(repository)
+        val viewModelProviderFactory = NewsViewModelProviderFactory(repository, requireContext())
 
         setUpRecyclerView()
 
@@ -78,8 +81,11 @@ class BreakingNews : Fragment() {
 
         }
 
+
+
         newsViewModel = ViewModelProvider(requireActivity(), viewModelProviderFactory)[NewsViewModel::class.java]
 
+        checkForInterNetConnectionAndCallForBreakingNews()
 
 
         newsViewModel.breakingNews.observe(viewLifecycleOwner) { response ->
@@ -141,6 +147,19 @@ class BreakingNews : Fragment() {
 
     private fun showProgressBar() {
         binding.paginationProgressBar.visibility = View.VISIBLE
+    }
+
+    private fun checkForInterNetConnectionAndCallForBreakingNews() {
+        NetworkConnectivityObserver(requireContext()).observe(viewLifecycleOwner) {
+            when(it) {
+                ConnectivityObserver.Available -> {
+                    newsViewModel.getBreakingNews("in")
+                }
+                ConnectivityObserver.Unavailable -> {
+                    Snackbar.make(requireView(), "No Internet Connection", Snackbar.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
 
